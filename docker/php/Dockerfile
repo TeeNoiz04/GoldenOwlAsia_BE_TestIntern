@@ -53,6 +53,9 @@ COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/php/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+CMD php artisan migrate --force && \
+    if [ "$RUN_SEED" = "true" ]; then php artisan db:seed --force; fi && \
+    php artisan serve --host=0.0.0.0 --port=$PORT
 EXPOSE 8080
 
 ENTRYPOINT ["/entrypoint.sh"]
