@@ -1,26 +1,58 @@
 FROM php:8.2-fpm
 
-# Install system dependencies
+# Set memory limit
+RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini
+
+# Install system dependencies & PHP extensions
 RUN apt-get update && apt-get install -y \
+    nginx \
     git \
     curl \
     zip \
     unzip \
     libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
-    libzip-dev
+    libzip-dev \
+    libicu-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        pdo \
+        pdo_mysql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        zip \
+        intl
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
-
-# Install Composer
+# Copy composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Set working directory
 WORKDIR /var/www
 
+# Copy source code (PHẢI COPY TRƯỚC ENTRYPOINT)
 COPY . .
 
-RUN composer install
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-RUN chown -R www-data:www-data /var/www
+# Laravel permissions
+RUN mkdir -p storage/logs bootstrap/cache \
+ && chown -R www-data:www-data storage bootstrap/cache \
+ && chmod -R 775 storage bootstrap/cache
+
+
+# Nginx config
+COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy entrypoint
+COPY docker/php/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["/entrypoint.sh"]
