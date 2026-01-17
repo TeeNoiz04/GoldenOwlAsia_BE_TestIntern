@@ -4,13 +4,6 @@ set -e
 # Default PORT to 8080 if not provided
 PORT_ENV=${PORT:-8080}
 
-# Update Nginx listen port dynamically
-if grep -q "listen " /etc/nginx/conf.d/default.conf; then
-  sed -i "s/listen [0-9]\+;/listen ${PORT_ENV};/" /etc/nginx/conf.d/default.conf
-else
-  echo "server { listen ${PORT_ENV}; root /var/www/public; index index.php index.html; }" > /etc/nginx/conf.d/default.conf
-fi
-
 # Ensure proper permissions
 mkdir -p /var/www/storage/logs /var/www/bootstrap/cache
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
@@ -35,8 +28,9 @@ if [ -z "${APP_KEY}" ]; then
   echo "[WARN] APP_KEY is not set. Set it in Railway variables."
 fi
 
-# Start PHP-FPM in background
-php-fpm -D
+# Start Nginx in background
+nginx -g 'daemon off;' &
 
-# Start Nginx in foreground
-nginx -g 'daemon off;'
+# Start PHP built-in server on the specified PORT
+php -S 0.0.0.0:${PORT_ENV} -t /var/www/public /var/www/public/index.php
+
