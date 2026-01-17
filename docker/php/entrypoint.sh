@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# Default PORT to 8080 if not provided
-PORT_ENV=${PORT:-8080}
-
 # Ensure proper permissions
 mkdir -p /var/www/storage/logs /var/www/bootstrap/cache
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
