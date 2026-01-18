@@ -23,8 +23,7 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN mkdir -p storage/logs bootstrap/cache \
  && chmod -R 775 storage bootstrap/cache
-
-# # 🚀 CHỈ 1 LỆNH
+ 
 # CMD php artisan migrate --force && \
 #     if [ "$RUN_SEED" = "true" ]; then php artisan db:seed --force;
 
