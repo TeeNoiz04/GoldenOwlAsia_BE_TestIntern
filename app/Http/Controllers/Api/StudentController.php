@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Http\Requests\CheckScoreRequest;
 use App\Helpers\ApiResponse;
 use App\Domain\Group\GroupCalculatorRegistry;
+use App\Domain\Statistics\SubjectConfig;
 
 class StudentController extends Controller
 {
@@ -25,15 +26,14 @@ class StudentController extends Controller
         $registry = new GroupCalculatorRegistry();
         
         // Calculate total score of all subjects
-        $totalAllSubjects = ($student->toan ?? 0)
-            + ($student->ngu_van ?? 0)
-            + ($student->ngoai_ngu ?? 0)
-            + ($student->vat_li ?? 0)
-            + ($student->hoa_hoc ?? 0)
-            + ($student->sinh_hoc ?? 0)
-            + ($student->lich_su ?? 0)
-            + ($student->dia_li ?? 0)
-            + ($student->gdcd ?? 0);
+        $totalAllSubjects = 0;
+        $subjects = [];
+        foreach (SubjectConfig::getAllKeys() as $subject) {
+            $score = $student->$subject ?? 0;
+            $englishName = SubjectConfig::getDisplayName($subject);
+            $subjects[$englishName] = $score;
+            $totalAllSubjects += $score;
+        }
 
         // Calculate score for each group
         $groupScores = [];
@@ -50,17 +50,7 @@ class StudentController extends Controller
         return ApiResponse::success(
             [
                 'registration_number' => $student->sbd,
-                'subjects' => [
-                    'toan' => $student->toan,
-                    'ngu_van' => $student->ngu_van,
-                    'ngoai_ngu' => $student->ngoai_ngu,
-                    'vat_li' => $student->vat_li,
-                    'hoa_hoc' => $student->hoa_hoc,
-                    'sinh_hoc' => $student->sinh_hoc,
-                    'lich_su' => $student->lich_su,
-                    'dia_li' => $student->dia_li,
-                    'gdcd' => $student->gdcd,
-                ],
+                'subjects' => $subjects,
                 'total_all_subjects' => $totalAllSubjects,
                 'group_scores' => array_values($groupScores),
             ],
