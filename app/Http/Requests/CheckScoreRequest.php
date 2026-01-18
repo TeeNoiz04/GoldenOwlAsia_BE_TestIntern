@@ -31,7 +31,6 @@ class CheckScoreRequest extends FormRequest
             'registrationNumber' => [
                 'required',
                 'string',
-                'exists:students,sbd'
             ],
         ];
     }
