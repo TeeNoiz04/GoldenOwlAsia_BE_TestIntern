@@ -24,7 +24,9 @@ RUN composer install --no-dev --optimize-autoloader
 RUN mkdir -p storage/logs bootstrap/cache \
  && chmod -R 775 storage bootstrap/cache
 
-# 🚀 CHỈ 1 LỆNH
-CMD php artisan migrate --force && \
-    if [ "$RUN_SEED" = "true" ]; then php artisan db:seed --force; fi && \
-    php artisan serve --host=0.0.0.0 --port=$PORT
+# # 🚀 CHỈ 1 LỆNH
+# CMD php artisan migrate --force && \
+#     if [ "$RUN_SEED" = "true" ]; then php artisan db:seed --force;
+
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan queue:work --tries=3 --timeout=90
