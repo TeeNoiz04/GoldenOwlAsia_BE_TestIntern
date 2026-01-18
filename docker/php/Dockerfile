@@ -29,4 +29,4 @@ RUN mkdir -p storage/logs bootstrap/cache \
 #     if [ "$RUN_SEED" = "true" ]; then php artisan db:seed --force;
 
 CMD php artisan serve --host=0.0.0.0 --port=$PORT
-CMD php artisan queue:work --tries=3 --timeout=90
+# CMD php artisan queue:work --tries=3 --timeout=90
