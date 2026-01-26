@@ -15,13 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-         $this->call([
-            StudentSeeder::class,
-        ]);
         if (\App\Models\Student::count() > 0) {
             return;
         }
-       
+        $this->call([
+            StudentSeeder::class,
+        ]);
 
 
     }
