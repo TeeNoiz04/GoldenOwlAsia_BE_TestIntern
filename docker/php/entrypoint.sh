@@ -54,9 +54,8 @@ echo "✅ Database ready"
 
 php artisan migrate --force
 
-if [ \"$RUN_SEED\" = \"true\" ]; then
-  php artisan db:seed --force
-fi
+echo "🌱 RUNNING SEED"
+php artisan db:seed --force -vvv
 
 echo "🚀 Starting server"
 exec php -S 0.0.0.0:8080 -t public
