@@ -32,30 +32,25 @@
 # php -S 0.0.0.0:${PORT_ENV} -t /var/www/public /var/www/public/index.php
 
 #!/bin/sh
+set -e
 
 echo "⏳ Waiting for database..."
 
-until php -r "
-try {
-    new PDO(
-        'mysql:host=' . getenv('DB_HOST') . ';port=' . getenv('DB_PORT') . ';dbname=' . getenv('DB_DATABASE'),
-        getenv('DB_USERNAME'),
-        getenv('DB_PASSWORD')
-    );
-    echo 'DB connected';
-} catch (Exception \$e) {
-    exit(1);
-}
-"; do
-  sleep 3
+until php artisan migrate:status > /dev/null 2>&1
+do
+  sleep 2
 done
 
 echo "✅ Database ready"
 
 php artisan migrate --force
 
-echo "🌱 RUNNING SEED"
-php artisan db:seed --force -vvv
+if [ "$RUN_SEED" = "true" ]; then
+  echo "🌱 Seeding database..."
+  php artisan db:seed --force
+else
+  echo "⚠️ RUN_SEED not enabled, skip seeding"
+fi
 
 echo "🚀 Starting server"
-exec php -S 0.0.0.0:8080 -t public
+php artisan serve --host=0.0.0.0 --port=8080
