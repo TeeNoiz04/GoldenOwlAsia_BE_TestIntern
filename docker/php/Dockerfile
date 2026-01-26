@@ -20,12 +20,12 @@ RUN mkdir -p storage/logs bootstrap/cache \
 
 EXPOSE 8080
 
-CMD php artisan migrate --force && \
-    php -S 0.0.0.0:8080 -t public
-# COPY entrypoint.sh /entrypoint.sh
-# RUN chmod +x /entrypoint.sh
-# CMD ["/entrypoint.sh"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
-CMD php artisan queue:work --tries=3 --timeout=90
+ENV RUN_MIGRATIONS=true
+ENV RUN_SEEDS=true
+ENV PORT_ENV=8080
+
+CMD ["/entrypoint.sh"]
 
