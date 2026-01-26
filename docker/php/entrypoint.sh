@@ -14,10 +14,13 @@ php /var/www/artisan view:cache || true
 
 # Optionally run database migrations/seeds via env flags
 if [ "${RUN_MIGRATIONS}" = "true" ]; then
+  echo "Running migrations..."
   php /var/www/artisan migrate --force || true
 fi
 if [ "${RUN_SEEDS}" = "true" ]; then
+  echo "Running seeds..."
   php /var/www/artisan db:seed --force || true
+  echo "Seeding completed!"
 fi
 
 # Warn if APP_KEY missing (prefer setting via env on Railway)

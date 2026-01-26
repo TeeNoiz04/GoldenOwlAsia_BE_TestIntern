@@ -16,13 +16,15 @@ class StudentSeeder extends Seeder
     {
          $file = database_path('data/diem_thi_thpt_2024.csv');
         if (!file_exists($file) || !is_readable($file)) {
-            $this->command->info('CSV file not found or not readable.');
+            $this->command->error('❌ CSV file not found or not readable: ' . $file);
             return;
         }
 
+        $this->command->info('✅ Starting to seed students from CSV...');
         $header = null;
         $batchSize = 1000;
         $data = [];
+        $totalRows = 0;
 
         if (($handle = fopen($file, 'r')) !== false) {
             while (($row = fgetcsv($handle, 0, ',')) !== false) {
@@ -35,9 +37,11 @@ class StudentSeeder extends Seeder
                     return $value === '' ? null : $value;
                 }, array_combine($header, $row));
 
+                $totalRows++;
 
                 if (count($data) >= $batchSize) {
                     Student::insert($data);
+                    $this->command->info("✅ Inserted {$batchSize} rows...");
                     $data = [];
                 }
             }
@@ -49,7 +53,7 @@ class StudentSeeder extends Seeder
             fclose($handle);
         }
 
-        $this->command->info('Students CSV imported successfully!');
+        $this->command->info("✅ Successfully seeded {$totalRows} students!");
         RecalculateSubjectStatistics::dispatch();
     }
 
